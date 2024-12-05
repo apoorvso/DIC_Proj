@@ -1,8 +1,3 @@
-# Documentation:
-# Azure Web Apps Deploy action: https://github.com/Azure/webapps-deploy
-# More GitHub Actions for Azure: https://github.com/Azure/actions
-# Info on Python, GitHub Actions, and Azure App Service: https://aka.ms/python-webapps-actions
-
 name: Build and Deploy Python App to Azure Web App - DIC-proj
 
 on:
@@ -32,25 +27,28 @@ jobs:
           python -m venv venv
           source venv/bin/activate
 
-      # Step 4: Install dependencies from requirements.txt
+      # Step 4: Install dependencies
       - name: Install dependencies
         run: |
           pip install --upgrade pip
           pip install -r requirements.txt
 
-      # Step 5: Collect static files (optional, for Django apps)
+      # Step 5: Collect static files (Django-specific)
       - name: Collect static files
         run: |
+          cd crop_yield_predictor
           python manage.py collectstatic --noinput
 
-      # Step 6: Apply database migrations (optional, for Django apps)
+      # Step 6: Apply database migrations (Django-specific)
       - name: Apply database migrations
         run: |
+          cd crop_yield_predictor
           python manage.py migrate
 
       # Step 7: Zip the artifact for deployment
       - name: Zip artifact for deployment
-        run: zip -r release.zip ./* -x "venv/*" "*.log" "*.pyc" "__pycache__/*"
+        run: |
+          zip -r release.zip ./* -x "venv/*" "*.log" "*.pyc" "__pycache__/*"
 
       # Step 8: Deploy to Azure Web App
       - name: Deploy to Azure Web App
