@@ -1,4 +1,8 @@
-name: Build and Deploy Python App to Azure Web App - DIC-proj
+# Docs for the Azure Web Apps Deploy action: https://github.com/Azure/webapps-deploy
+# More GitHub Actions for Azure: https://github.com/Azure/actions
+# More info on Python, GitHub Actions, and Azure App Service: https://aka.ms/python-webapps-actions
+
+name: Build and deploy Python app to Azure Web App - DIC-proj
 
 on:
   push:
@@ -7,52 +11,68 @@ on:
   workflow_dispatch:
 
 jobs:
-  build-and-deploy:
-    name: Build and Deploy to Azure Web App - DIC-proj
-    runs-on: ubuntu-22.04
+  build:
+    runs-on: ubuntu-latest
 
     steps:
-      # Step 1: Checkout the repository
       - uses: actions/checkout@v4
 
-      # Step 2: Set up Python environment
       - name: Set up Python version
         uses: actions/setup-python@v5
         with:
           python-version: '3.12'
 
-      # Step 3: Create and activate a virtual environment
-      - name: Create and activate virtual environment
+      - name: Create and start virtual environment
         run: |
           python -m venv venv
           source venv/bin/activate
-
-      # Step 4: Install dependencies
+      
       - name: Install dependencies
-        run: |
-          pip install --upgrade pip
-          pip install -r requirements.txt
+        run: pip install -r requirements.txt
+        
+      # Optional: Add step to run tests here (PyTest, Django test suites, etc.)
 
-      # Step 5: Collect static files (Django-specific)
-      - name: Collect static files
-        run: |
-          cd crop_yield_predictor
-          python manage.py collectstatic --noinput
-
-      # Step 6: Apply database migrations (Django-specific)
-      - name: Apply database migrations
-        run: |
-          cd crop_yield_predictor
-          python manage.py migrate
-
-      # Step 7: Zip the artifact for deployment
       - name: Zip artifact for deployment
-        run: |
-          zip -r release.zip ./* -x "venv/*" "*.log" "*.pyc" "__pycache__/*"
+        run: zip release.zip ./* -r
 
-      # Step 8: Deploy to Azure Web App
-      - name: Deploy to Azure Web App
-        uses: azure/webapps-deploy@v3
+      - name: Upload artifact for deployment jobs
+        uses: actions/upload-artifact@v4
         with:
-          app-name: 'DIC-proj'  # Replace with your Web App name
-          publish-profile: ${{ secrets.AZURE_WEBAPP_PUBLISH_PROFILE }}
+          name: python-app
+          path: |
+            release.zip
+            !venv/
+
+  deploy:
+    runs-on: ubuntu-latest
+    needs: build
+    environment:
+      name: 'Production'
+      url: ${{ steps.deploy-to-webapp.outputs.webapp-url }}
+    permissions:
+      id-token: write #This is required for requesting the JWT
+
+    steps:
+      - name: Download artifact from build job
+        uses: actions/download-artifact@v4
+        with:
+          name: python-app
+
+      - name: Unzip artifact for deployment
+        run: unzip release.zip
+
+      
+      - name: Login to Azure
+        uses: azure/login@v2
+        with:
+          client-id: ${{ secrets.AZUREAPPSERVICE_CLIENTID_1837A34E67B64DCDAAE4E7F7EB18694E }}
+          tenant-id: ${{ secrets.AZUREAPPSERVICE_TENANTID_EAA726017528467CB8BEF275B4FD50A5 }}
+          subscription-id: ${{ secrets.AZUREAPPSERVICE_SUBSCRIPTIONID_401A25EF0751447AAAE0656BA685D8D1 }}
+
+      - name: 'Deploy to Azure Web App'
+        uses: azure/webapps-deploy@v3
+        id: deploy-to-webapp
+        with:
+          app-name: 'DIC-proj'
+          slot-name: 'Production'
+          
