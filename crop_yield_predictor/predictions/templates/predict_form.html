@@ -1,0 +1,79 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="{% static 'predictions/predict.css/' %}">
+    <link rel="stylesheet" href="{% static 'predictions/predict.css/' %}">
+    <script src="{% static 'predictions/script.js' %}" defer></script>
+    <title>Climate Impact Prediction</title>
+</head>
+<body>
+    
+    <header>
+        <h1 id="title">Crop Predictor</h1>
+        <h2 id="title1"> Climate Impact Prediction </h2>
+    </header>
+    <main>
+        <!-- Left Section: Form and Prediction -->
+        <section id="form-section">
+            <h2>Form</h2>
+            <form method="POST">
+                {% csrf_token %}
+                {{ form.as_p }}  <!-- Render the form fields automatically -->
+                
+                <button type="submit">Predict</button>
+            </form>
+            {% if result %}
+            <div class="result">
+                <h3>Outcome of Prediction</h3>
+                <p>Prediction Result: {{ result }}</p>
+            </div>
+            {% endif %}
+        </section>
+    
+        <!-- Right Half: Model Description and Graph -->
+        <div id="right-section">
+            <!-- Model Description (30%) -->
+            <div id="model-description">
+                <h2>Model Description</h2>
+                <p>The Deep Neural Network (DNN) model predicts Total Climate Impact by learning complex, 
+                    nonlinear relationships between features like temperature, CO2 emissions, and extreme weather events. With multiple hidden layers, 
+                    it captures intricate feature interactions. The model is scalable, allowing the addition of new variables to improve predictions 
+                    as more climate data becomes available.</p>
+            </div>
+    
+            <!-- Graph Section (70%) -->
+            <div id="graph-container" class="graph">
+                <!-- Tabs for Graph Selection -->
+                <div class="tabs">
+                    <div class="tab active" data-tab="tab1">Graph 1</div>
+                    <div class="tab" data-tab="tab2">Graph 2</div>
+                    <div class="tab" data-tab="tab3">Graph 3</div>
+                    <div class="tab" data-tab="tab4">Graph 4</div>
+                </div>
+
+                <!-- Graph Display Section -->
+                <div id="graph-content">
+                    <!-- Default Graph (Tab 1) -->
+                    <div class="graph active" id="tab1">
+                        <img src="{% static 'images/m3_1.jpeg/' %}" alt="Graph 1">
+                    </div>
+                    <!-- Hidden Graphs (Tab 2 and Tab 3) -->
+                    <div class="graph" id="tab2" style="display: none;">
+                        <img src="{% static 'images/m3_2.jpeg/' %}" alt="Graph 2">
+                    </div>
+                    <div class="graph" id="tab3" style="display: none;">
+                        <img src="{% static 'images/m3_1.jpeg/' %}" alt="Graph 3">
+                    </div>
+                    <div class="graph" id="tab4" style="display: none;">
+                        <img src="{% static 'images/m3_1.jpeg/' %}" alt="Graph 4">
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+    
+</body>
+</html>
